@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+build/
+bin/
+data/
+.kdev4/
+.vscode/
+MagMatch.kdev4
+cmake_modules/FindG2O.cmake
