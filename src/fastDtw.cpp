@@ -1,9 +1,8 @@
 #include "fastDtw.hpp"
 
-
-void fastDtw::s_fastDtw(float *x, float *y,float distance,int *x_index,int *y_index, FunctionName fn , float radius )
+void fastDtw::fastdtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path, FunctionName fn , int radius )
 {
-
+    s__fastDtw(x,y,distance,path,s__difference,radius);
 }
 
 float fastDtw::s__difference(float a,float b)
@@ -11,110 +10,243 @@ float fastDtw::s__difference(float a,float b)
     return abs(a-b);
 }
 
-void fastDtw::s__prep_input(float*x,float*y, FunctionName dist)
+void fastDtw::s__prep_input(vector<float> x, vector<float> y, FunctionName dist)
 {
 
 }
 
 
-void fastDtw::s__dtw(float *x,int len_x,float *y,int len_y,float distance,int* x_index,int x_index_len,int* y_index,int y_index_len,FunctionName dist )
+void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,float *distance,vector<pair_2> &path,FunctionName dist )
 {
-    float *D;
+
+    // int max_x_y;
+    if (windows.size()==0)
+    {
+        for (int i = 0; i < x.size(); i++)
+        {
+            for (int j = 0; j < y.size(); j++)
+            {
+                windows.push_back(pair_2(i,j));
+            }
+        }  
+    }
+    int x_max=0;
+    int y_max=0;
+
+    for (int i = 0; i < windows.size(); i++)
+    {
+        windows[i].x+=1;
+        windows[i].y+=1;
+        if (windows[i].x>x_max)
+        {
+            x_max=windows[i].x;
+        }
+        if(windows[i].y>y_max)
+        {
+            y_max=windows[i].y;
+        }
+    }
+    
+
+    x_max+=1;
+    y_max+=1;
+    int max_x_y=max(x_max,y_max);
+    vector<float> D(max_x_y*max_x_y,MAX_INF);
     D[0]=0;
-    int *D1;
-    int *D2;
-    D1[0]=0;
-    D2[0]=0;
-
-    if (x_index_len>0&& y_index_len>0)
+    vector<int> D1(max_x_y*max_x_y,0);
+    vector<int> D2(max_x_y*max_x_y,0);
+    int count_s=0;
+    for(auto var : windows)
     {
-        for (int i = 0; i < x_index_len; i++)
+        int i=var.x;
+        int j=var.y;
+        float dt=dist(x[i-1],y[j-1]);
+        D[i*x_max+j]=min(D[(i-1)*x_max+j],D[i*x_max+j-1]);
+        D[i*x_max+j]=min(D[i*x_max+j],D[(i-1)*x_max+j-1]);
+        if(D[i*x_max+j]==D[(i-1)*x_max+j])
         {
-            x_index[i]+=1;
+            D1[i*x_max+j]=i-1;
+            D2[i*x_max+j]=j;
         }
-        for (int j = 0; j < y_index_len; j++)
+        else if (D[i*x_max+j]==D[i*x_max+j-1])
         {
-            y_index[j]+=1;
+            D1[i*x_max+j]=i;
+            D2[i*x_max+j]=j-1;            
         }
+        else if (D[i*x_max+j]==D[(i-1)*x_max+j-1])
+        {
+            D1[i*x_max+j]=i-1;
+            D2[i*x_max+j]=j-1;
+        }
+        else
+        {
+            std::cout<<"sth.wrong"<<endl;
+        }
+        D[i*x_max+j]+=dt;
+        // printf("x[%d]=%.3f,y[%d]=%.3f,dst=%.3f",x[i-1],i-1,y[i-1],j-1,dt);
         
     }
-    else
-    {
-        x_index_len=len_x;
-        y_index_len=len_y;
-        for (int i = 0; i < x_index_len; i++)
-        {
-            x_index[i]=i+1;
-        }
-        for (int j = 0; j < y_index_len; j++)
-        {
-            y_index[j]=j+1;
-        }        
-    }
-
-
-    for (int x_i = 1; x_i < x_index_len+1; x_i++)
-    {
-        D[x_i*x_index_len]=0;
-        D1[x_i*x_index_len]=0;
-        D2[x_i*x_index_len]=0;
-    }
-    for (int y_i = 1; y_i < y_index_len+1; y_i++)
-    {
-        D[y_i]=0;
-        D1[y_i]=0;
-        D2[y_i]=0;
-    }    
-    for (int x_i = 0; x_i < x_index_len; x_i++)
-    {
-        for (int y_i = 0; y_i < y_index_len; y_i++)
-        {
-            float dt=dist(x[x_index[x_i]-1],y[y_index[y_i]-1]);
-            D[x_index[x_i]*x_index_len+y_index[y_i]]=min(D[(x_index[x_i]-1)*x_index_len+y_index[y_i]],D[x_index[x_i]*x_index_len+(y_index[y_i]-1)]);
-            D[x_index[x_i]*x_index_len+y_index[y_i]]=min(D[(x_index[x_i]-1)*x_index_len+(y_index[y_i]-1)],D[x_index[x_i]*x_index_len+y_index[y_i]]);
-            if (D[(x_index[x_i]-1)*x_index_len+y_index[y_i]]==D[x_i*x_index_len+y_index[y_i]])
-            {
-                D1[x_index[x_i]*x_index_len+y_index[y_i]]=x_index[x_i]-1;
-                D2[x_index[x_i]*x_index_len+y_index[y_i]]=y_index[y_i];
-            }
-            else if (D[(x_index[x_i])*x_index_len+y_index[y_i]-1]==D[x_i*x_index_len+y_index[y_i]])
-            {
-                D1[x_index[x_i]*x_index_len+y_index[y_i]]=x_index[x_i];
-                D2[x_index[x_i]*x_index_len+y_index[y_i]]=y_index[y_i]-1;
-            }
-            else
-            {
-                D1[x_index[x_i]*x_index_len+y_index[y_i]]=x_index[x_i]-1;
-                D2[x_index[x_i]*x_index_len+y_index[y_i]]=y_index[y_i]-1;                
-            }
-            D[x_index[x_i]*x_index_len+y_index[y_i]]+=dt;
-        }
-        
-    }
-    int i=len_x;
-    int j=len_y;
-    int* rx;
-    int* ry;
+    path.clear();
+    // for (int i = 0; i < D.size(); i++)
+    // {
+    //     printf("(%d,%d),(%.5f,%d,%d),",int(i/x_max),i%x_max,D[i],D1[i],D2[i]);
+    // }
+    // cout<<endl;
+    // cout<<D.size()<<endl;
+    int i=x.size();
+    int j=y.size();
+    vector<int> rx,ry;
     int count=0;
     while (!(i==0 && j==0))//替代i==j==0,
     {
-        rx[count]=i-1;
-        ry[count]=j-1;
-        i=D1[i+x_index_len+j];
-        j=D2[i+x_index_len+j];
+        path.push_back(pair_2(i-1,j-1));
+        int tmp=i*x_max+j;
+        i=D1[tmp];
+        j=D2[tmp];
         count+=1;
     }
-    for (int i = 0; i < count; i++)
-    {
-        x_index[i]=rx[count-i-1];
-        y_index[i]=ry[count-i-1];
-    }
-    distance=D[len_x,len_y];
-    x_index_len=count-1;
-    y_index_len=count-1;
+    *distance=D[x.size()*x_max+y.size()];
+    float dis=D[x.size()*x_max+y.size()];
+    // cout<<"distance="<<dis<<endl;
+    reverse(path.begin(),path.end());
+
+    
 }
 
-void fastDtw::dtw(float *x,int len_x,float *y,int len_y,float distance,int* x_index,int x_index_len,int* y_index,int y_index_len,FunctionName dist )
-{    
-    s__dtw(x,len_x,y,len_y,distance, x_index,x_index_len, y_index,y_index_len,s__difference);
+void fastDtw::dtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path,FunctionName dist )
+{    vector<pair_2> windows;
+    s__dtw(x,y,windows,distance,path,s__difference);
+}
+
+void fastDtw::s__fastDtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path, FunctionName dist, int radius )
+{
+    double min_time_size = radius + 2;
+    if (x.size()<min_time_size || y.size()<min_time_size)
+    {
+        dtw(x,y,distance,path,dist);
+        return;
+    }
+    vector<float> x_shrinked;
+    vector<float> y_shrinked;
+    reduce_by_half(x,x_shrinked);
+    reduce_by_half(y,y_shrinked);
+    vector<pair_2> new_path;
+    s__fastDtw(x_shrinked,y_shrinked,distance,new_path,s__difference,radius);
+    // printf("xxx");
+    // for(auto var : new_path)
+    // {
+    //     printf("(%d,%d),",var.x,var.y);
+    // }
+    // cout<<endl;
+    // cout<<x.size()<<" "<<y.size()<<endl;
+
+    expand_windows(new_path,x.size(),y.size(),radius);
+    // cout<<"windows"<<endl;
+    // for(auto var : x)
+    // {
+    //     cout<<var<<",";
+    // }
+    // cout<<endl;
+    // cout<<"--ooooooooo------"<<endl;
+
+
+
+    s__dtw(x,y,new_path,distance,path,dist);
+    return;
+}
+
+void fastDtw::reduce_by_half(vector<float> x,vector<float> &x_result)
+{
+    for (int i = 0; i < x.size()-x.size()%2; i=i+2)
+    {
+        x_result.push_back((x[i]+x[1+i])/2); 
+    }
+    
+}
+void  fastDtw::expand_windows(vector<pair_2> &path,int len_x,int len_y,int radius)
+{
+    // cout<<path.size()<<endl;
+    // for(auto var : path)
+    // {
+    //     cout<<var.x<<"--------"<<var.y<<endl;
+    // }
+    unordered_set <pair_2,pair_2_int_hash> path_;
+    for(auto var : path)
+    {
+        path_.insert(var);
+        int i=var.x;
+        int j=var.y;
+        for (int ai = -radius; ai < radius+1; ai++)
+        {
+            for (int bi = -radius; bi < radius+1; bi++)
+            {
+                // cout<<"sdsdasd"<<ai+i<<"sdsad "<<bi+j<<"i "<<i<<"j "<<j<<endl;
+                path_.insert(pair_2 (ai+i,bi+j));
+                // cout<<"len"<<path_.size()<<endl;
+            }
+            
+        }        
+    }
+
+    // cout<<"--cccccccccccccc---"<<endl;
+
+    // for(auto var : path_)
+    // {
+    //      printf("(%d,%d),",var.x,var.y);
+    // }
+    // cout<<endl;
+    // cout<<path_.size()<<endl;
+    
+
+    unordered_set<pair_2,pair_2_int_hash> windows;
+    for(auto var : path_)
+    {
+        int i=var.x;
+        int j=var.y;
+        // cout<<"px "<<var.x<<"py "<<var.y;      
+        windows.insert(pair_2(i*2,j*2));
+        windows.insert(pair_2(i*2,j*2+1));
+        windows.insert(pair_2(i*2+1,j*2));
+        windows.insert(pair_2(i*2+1,j*2+1));        
+        // cout<<windows.size()<<endl;
+    }
+    // cout<<"--dddddddddddd---"<<endl;
+    // cout<<windows.size()<<endl;
+    // for(auto var : windows)
+    // {
+    //      printf("(%d,%d),",var.x,var.y);
+    // }
+    // cout<<endl;
+    
+
+    path.clear();
+
+    int start_j=0;
+    for (int i = 0; i < len_x; i++)
+    {
+        int new_start_j=MAX_INF;
+        for (int j = start_j; j < len_y; j++)
+        {          
+            auto it =windows.find(pair_2(i,j));
+            if (it!=windows.end())
+            {
+                path.push_back(pair_2(i,j));
+                if(new_start_j==MAX_INF)
+                {
+
+                    new_start_j=j;
+                }
+
+            }
+            else if (new_start_j!=MAX_INF)
+            {
+                break;
+            }
+
+        }
+        start_j=new_start_j;
+    }
+    
+    
+    
 }

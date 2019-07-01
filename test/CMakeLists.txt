@@ -1,8 +1,8 @@
 # add_executable( pdrv pdrv.cpp )
 # target_link_libraries( pdrv SHS )
 # 
-add_executable( tets main.cpp )
-target_link_libraries( tets MagMatch )
+add_executable( main main.cpp )
+target_link_libraries( main MagMatch )
 # 
 # add_executable( disAtt dis_att.cpp )
 # target_link_libraries( disAtt SHS )

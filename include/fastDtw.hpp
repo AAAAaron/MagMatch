@@ -1,6 +1,8 @@
 #pragma once
 #include "common_include.h"
-
+#define MAX_INF 1e+9
+#include <unordered_set>
+using namespace std;
 class fastDtw
 {
 
@@ -46,8 +48,11 @@ public:
         (2.0, [(0, 0), (1, 0), (2, 1), (3, 2), (4, 2)])
     '''
 ************************************************************/
-    void static s_fastDtw(float *x, float *y,float distance,int *x_index,int *y_index, FunctionName dist = nullptr, float radius = 1.0);
+    void static fastdtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path, FunctionName dist = nullptr, int radius = 1);
+    void static s__fastDtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path, FunctionName dist = nullptr, int radius = 1);
     float static  s__difference(float a,float b);
+    void static reduce_by_half(vector<float> x,vector<float> &x_result);
+    void static expand_windows(vector<pair_2> &path,int len_x,int len_y,int radius);
     // void static __difference()
 
 /*    ''' return the distance between 2 time series without approximation
@@ -80,9 +85,8 @@ public:
         >>> fastdtw.dtw(x, y)
         (2.0, [(0, 0), (1, 0), (2, 1), (3, 2), (4, 2)])
     '''*/
-    void static dtw(float *x,int len_x,float *y,int len_y,float distance,int* x_index,int x_index_len,int* y_index,int y_index_len,FunctionName dist = nullptr);
-    void static s__dtw(float *x,int len_x,float *y,int len_y,float distance,int* x_index,int x_index_len,int* y_index,int y_index_len,FunctionName dist = nullptr);
-    // void static __dtw(float *x,int len_x,float *y,int len_y,float distance,int* x_index,int x_index_len,int* y_index,int y_index_len,FunctionName dist = nullptr);
-    void static s__prep_input(float *x,float *y, FunctionName dist=nullptr);
+    void static dtw(vector<float> x, vector<float> y,float *distance,vector<pair_2> &path,FunctionName dist = nullptr);
+    void static s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,float *distance,vector<pair_2> &path,FunctionName dist =nullptr);
+    void static s__prep_input(vector<float> x, vector<float> y, FunctionName dist=nullptr);
 private:
 };
