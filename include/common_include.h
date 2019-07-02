@@ -11,8 +11,18 @@ using namespace Eigen;
 #include <algorithm>
 #include <iostream>
 using namespace std;
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include <ctime>
 
 // template <class T>
+float static _define_random_rand()
+{
+    srand((int)time(0));
+    return rand()/RAND_MAX;
+    
+};
 struct pair_2
 {
     int x;
@@ -44,6 +54,13 @@ struct pair_2_int_hash{
     return std::hash<string>()(tmp);
     }
 };
+// template <class T>
+struct pair2_xy
+{
+    float x;
+    float y;
+    pair2_xy(float _x,float _y):x(_x),y(_y){};
+};
 
 template <class T>
 struct pair_3
@@ -51,8 +68,15 @@ struct pair_3
     T x;
     T y;
     T z;
+    pair_3(T _x,T _y,T _z):x(_x),y(_y),z(_z){};
 };
-
+struct mag_data
+{
+    float x;
+    float y;
+    float mmagn;//地磁模值
+    mag_data(float _x,float _y,float _mmagn):x(_x),y(_y),mmagn(_mmagn){};
+};
 
 typedef float (* FunctionName)(float ,float );
 #endif
