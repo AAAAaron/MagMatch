@@ -5,7 +5,7 @@ magMatchBase::magMatchBase()
     start_node=nodeClass(-1);
     
 }
-
+//初始化的yaw角度主要指的是偏移量
 
 void magMatchBase::magMatchBase_init(int init_node_index,float yaw,vector<vector<float>> nresult,int init_fm_interval)
 {
@@ -57,9 +57,10 @@ bool magMatchBase::init_add_item(int init_node_index,float yaw)
         ts->ob_x=finger_mark[init_node_index].x;
         ts->ob_y=finger_mark[init_node_index].x;
         start_node.appendNode(ts);
+        ts->node_start=init_node_index;
         tmp_node_list.push_back(ts);        
     }
-    
+    start_index_list.insert(init_node_index);
     
 }
 
@@ -84,6 +85,10 @@ void magMatchBase::init_finger_mark(vector<vector<float>> nresult)
     float speend_time;
 float magMatchBase::processData(float ob_distance,float epoch_angle,float magnetic_norm)
 {
+
+    //多的时候就先预置一个，然后找到最小的替换这个，最后append
+    tmp_node_list_size=tmp_node_list.size();
+    observation_content_size=observation_content.size();  
     if (ob_distance<=0)
     {
         cout<<"ob_distance必须大于0"<<endl;
@@ -92,11 +97,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     t1 = clock();    
     if (observation_content.size()>20)
     {
-        DISTANCE_thre=1;
+        DISTANCE_thre=3;
     }
-    if (observation_content.size()>80)
+    if (observation_content.size()>100)
     {
-        DISTANCE_thre=0.5;
+        DISTANCE_thre=1.5;
     }    
     if (observation_content.size()>50 || tmp_node_list.size()>pro_node_extend_len)
     {
@@ -105,6 +110,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     if (tmp_node_list.size()>300)
     {
         COS_thre=cos(M_PI/3.0);
+    }
+    if (tmp_node_list_size<20)
+    {
+        // COS_thre=cos(M_PI/2.5);
+        // distance_coefficient_min_thre=0.2;
     }
     
     ob_dis_x_y[0]=sin(epoch_angle);
@@ -122,6 +132,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     t2 = clock();
     speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("初始化　time speend %.3f\r\n'" , speend_time);
+ 
     for(nodeClass* leaf_node : tmp_node_list)
     {
         if (observation_content.size()>8)
@@ -130,9 +141,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
             ob_dis_x_y[0]=sin(epoch_angle+leaf_node->_yaw);
             ob_dis_x_y[1]=cos(epoch_angle+leaf_node->_yaw);        
         }
-        //多的时候就先预置一个，然后找到最小的替换这个，最后append
-        tmp_node_list_size=tmp_node_list.size();
-        observation_content_size=observation_content.size();
+
         if(tmp_node_list_size>pro_node_extend_len || observation_content_size<20){
             tmpnode=new nodeClass(-1);
         }
@@ -155,7 +164,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                     {
                         distance_coefficient=abs(ob_distance*leaf_node->_scale-fp_distance)/(ob_distance*leaf_node->_scale)-1;
                         if(tmp_node_list_size>pro_node_extend_len || observation_content_size<20){
-                            if (distance_coefficient<0.1 && distance_coefficient<distance_coefficient_min)
+                            if (distance_coefficient<0.5 && distance_coefficient<distance_coefficient_min)
                             {
                                 tmpnode->node_index=fp_index;
                                 tmpnode->_yaw=leaf_node->_yaw;
@@ -167,7 +176,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                         }
                         else
                         {
-                            if (abs(distance_coefficient)<0.05)
+                            if (abs(distance_coefficient)<0.2)
                             {
                                 tmpnode=new nodeClass(fp_index);
                                 tmpnode->_yaw=leaf_node->_yaw;
@@ -177,9 +186,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                                 leaf_node->appendNode(tmpnode);
                                 newtmpnode_list.push_back(tmpnode);     
                             }                       
-                        }
-                        
-                        
+                        }  
                     }
                 }
             }            
@@ -204,9 +211,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     tmp_node_list.clear();
     if (observation_content.size()>8)
     {
+        dtw_dis.clear();
         for(nodeClass* var : newtmpnode_list)
         {
             fp_mag.clear();
+            _path.clear();
             for(int seq_index : var->containSeq)
             {
                 fp_mag.push_back(finger_mark[seq_index].mmagn);
@@ -233,6 +242,8 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                 min_dis=_distance;
                 min_dis_item=var;
             }
+            // cout<<_distance<<"--";
+            dtw_dis.push_back(_distance);
             if(observation_content.size()>pro_len_angle+1)
             {
                 fp_mag_20.clear();
@@ -248,15 +259,45 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                 
             }
         }
-    t2 = clock();
-    speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
-    printf("匹配距离计算time speend %.3f\r\n'" , speend_time);
+        if (dtw_dis.size()>0)
+        {
+            max_dis=*max_element(dtw_dis.begin(),dtw_dis.end());
+            DTWDIS_THRE=(max_dis-min_dis)/min_dis;
+            if (DTWDIS_THRE<0.01)
+            {
+                newtmpnode_list.clear();
+                tmp_node_list.push_back(min_dis_item);
+            }
+            else if (DTWDIS_THRE<0.5 or newtmpnode_list.size()>8*pro_node_extend_len)
+            {
+                DTWDIS_THRE=(max_dis-min_dis)/4.0+min_dis;
+            }
+            else
+            {
+                DTWDIS_THRE=(max_dis+min_dis)/2.0;
+            }
+            
+            printf("dismax=%.3f,dismin=%.3f,thre=%.3f",max_dis,min_dis,DTWDIS_THRE);
+            if(newtmpnode_list.size()<4*pro_node_extend_len)
+            {
+                DTWDIS_THRE=1e+9;
+            }
+        }
+        else//newnode里面没东西的时候就吧上次的弄过来
+        {
+            tmp_node_list.push_back(min_dis_item);
+        }
+        
+        t2 = clock();
+        speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
+        printf("newtmpnode_list:::=%ld\r\n" , newtmpnode_list.size());
+        printf("匹配距离计算time speend %.3f\r\n'" , speend_time);
         for(auto item : newtmpnode_list)
         {
             dis_dif = item->node_probability-min_dis;
-            if( (dis_dif/min_dis <= DISTANCE_thre ) || _define_random_rand()< 0.01)
+            if( dis_dif/min_dis <= DISTANCE_thre && item->node_probability<=DTWDIS_THRE)
             {
-                if (observation_content.size()>pro_len_angle){
+                if (observation_content.size()>pro_len_angle+1){
                     dis_dif_less=item->node_less_prob-min_dis_less;
                     if (dis_dif_less/min_dis_less <= DISTANCE_thre){//子串也符合要求  
                         if( observation_content.size()>adjust_len+1)
@@ -264,35 +305,43 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                             theta_2_all=atan2((finger_mark[item->node_index].x-finger_mark[item->node_start].x),(finger_mark[item->node_index].y-finger_mark[item->node_start].y));
                             theta_2=atan2((finger_mark[item->node_index].x-finger_mark[item->containSeq.at(item->containSeq.size()-adjust_len-1)].x),(finger_mark[item->node_index].y-finger_mark[item->containSeq.at(item->containSeq.size()-adjust_len-1)].y));
                             tmpyaw1=theta_2-theta_o;
-                            tmpyaw2=theta_o_all-theta_2_all;
+                            // tmpyaw2=theta_o_all-theta_2_all;
 
-                            // 从全程和局部上，选择变化大的那个
-                            if (cos(tmpyaw1-item->father->_yaw)<cos(tmpyaw2-item->father->_yaw))
+                            // // 从全程和局部上，选择变化大的那个
+                            // if (cos(tmpyaw1-item->father->_yaw)<cos(tmpyaw2-item->father->_yaw))
+                            // {
+                            //     item->_yaw=tmpyaw1;
+                            // }                            
+                            // else{
+                            //     item->_yaw=tmpyaw2;
+                            // }
+                            item->_yaw=tmpyaw1;
+                            if (cos(item->_yaw-item->father->_yaw)<np_cos_theta)
                             {
-                                item->_yaw=tmpyaw1;
-                            }                            
-                            else{
-                                item->_yaw=tmpyaw2;
+                                item->_yaw=item->father->_yaw;
                             }
+                            
                         }
                         else
                         {
-                            item->_yaw=item->_yaw;
+                            // item->_yaw=item->father->_yaw;
                         }
                         
 
                         tmp_node_list.push_back(item);
                     }
                 }
-                else{
-                    item->_yaw=item->_yaw;
+                else
+                {
+                    // item->_yaw=item->father->_yaw;
                     tmp_node_list.push_back(item);
                 }                                       
             }
         }
-    t2 = clock();
-    speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
-    printf("抽取结果，并计算方向time speend %.3f\r\n'" , speend_time);
+        printf("tsssss:node_count=%ld\r\n" , tmp_node_list.size());
+        t2 = clock();
+        speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
+        printf("抽取结果，并计算方向time speend %.3f\r\n'" , speend_time);
         printf("min dis %.3f\r\n", min_dis);
         // # print(min_dis_item.node_index)
         // # print(min_dis_item.node_start)
@@ -305,14 +354,14 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         out_tmp_dis = -1;
     }
 
-    if (tmp_node_list.size()<50)
+    if (tmp_node_list.size()<20)
     {
         /* code */
         int len_tmp_node_list=tmp_node_list.size();
         for (int tmp_leaf_node_index = 0; tmp_leaf_node_index < len_tmp_node_list; tmp_leaf_node_index++)
         {
             /* code */
-            for (int _ = 0; _ < 2; _++)
+            for (int _ = 0; _ < 4; _++)
             {
                 tmpnode = new nodeClass(tmp_node_list[tmp_leaf_node_index]->node_index);
                 tmpnode->node_index = tmp_node_list[tmp_leaf_node_index]->node_index+int((_define_random_rand()-0.5)*10);
@@ -321,7 +370,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                     continue;
                 }
                 tmpnode->_scale = tmp_node_list[tmp_leaf_node_index]->_scale * (_define_random_rand()+0.5);
-                tmpnode->_yaw=tmp_node_list[tmp_leaf_node_index]->_yaw*(_define_random_rand()*2-1)*0.1;
+                tmpnode->_yaw=tmp_node_list[tmp_leaf_node_index]->_yaw+(_define_random_rand()*2-1)*sample_step_yaw;
                 tmpnode->ob_x=tmp_node_list[tmp_leaf_node_index]->ob_x;
                 tmpnode->ob_y=tmp_node_list[tmp_leaf_node_index]->ob_y;
                 if (tmpnode->_scale > 1.5){
@@ -342,7 +391,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         for (int tmp_leaf_node_index = 0; tmp_leaf_node_index < len_newtmpnode_list; tmp_leaf_node_index++)
         {
             /* code */
-            for (int _ = 0; _ < 4; _++)
+            for (int _ = 0; _ < 5; _++)
             {
                 tmpnode = new nodeClass(newtmpnode_list[tmp_leaf_node_index]->node_index);
                 tmpnode->node_index = newtmpnode_list[tmp_leaf_node_index]->node_index+int((_define_random_rand()-0.5)*20);
@@ -351,7 +400,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                     continue;
                 }                
                 tmpnode->_scale = newtmpnode_list[tmp_leaf_node_index]->_scale * (_define_random_rand()+0.5)*2;
-                tmpnode->_yaw=newtmpnode_list[tmp_leaf_node_index]->_yaw*(_define_random_rand()*2-1)*0.5;
+                tmpnode->_yaw=newtmpnode_list[tmp_leaf_node_index]->_yaw+(_define_random_rand()*2-1)*sample_step_yaw*2;
                 tmpnode->ob_x=newtmpnode_list[tmp_leaf_node_index]->ob_x;
                 tmpnode->ob_y=newtmpnode_list[tmp_leaf_node_index]->ob_y;
                 if (tmpnode->_scale > 1.5){
@@ -366,20 +415,41 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         }
   
     }
+
+
+
+    
     printf("'node_count=%ld\r\n" , tmp_node_list.size());
     t2 = clock();
     speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("'time speend %.3f\r\n'" , speend_time);
     out_put_dis.push_back(pair_3<float>(newtmpnode_list.size(), out_tmp_dis, speend_time));
+        printf("--------------------------%ld---------------now the start is %d",start_index_list.size(),*start_index_list.begin());
+
+    if (start_index_list.size()==1)
+    {
+        printf("-----------------------------------------now the start is %d",*start_index_list.begin());
+    }
+    else
+    {
+        start_index_list.clear();
+        for(auto item : tmp_node_list)
+        {
+            start_index_list.insert(item->node_start);
+        }        
+    }    
+
     return out_tmp_dis;
 }
 
 vector<vector<int>> magMatchBase::get_current_node_list()
 {
     current_node_list_result.clear();
+    current_node_list_info.clear();
     for(auto var : tmp_node_list)
     {
         cout<<"now the node_index is "<<var->node_index<<"dis="<<var->node_probability<<endl;
+        current_node_list_info.push_back(var->node_probability);
         current_node_list_result.push_back(var->containSeq);
         for(auto item : var->containSeq)
         {

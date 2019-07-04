@@ -1,46 +1,68 @@
 #include "dataRead.hpp"
 
-dataRead::dataRead(string file_name,vector<vector<float>> &table_data) {
-    ifstream inFile(file_name);
-	string lineStr;
-	int count=0;
-
-	while (getline(inFile, lineStr))  {
-	stringstream ss(lineStr);
-	string str;  
-	vector<float> lineArray;  
-	// 按照逗号分隔  
-	
-	while (getline(ss, str, ','))  
-	{
-		lineArray.push_back(atof(str.c_str())); 	
-	}
-    table_data.push_back(lineArray);
-    }
-    inFile.close();
-}
-
-void static s_dataRead(string file_name,vector<vector<float>> &table_data)
+dataRead::dataRead(string file_name, vector<vector<float>> &table_data)
 {
-    ifstream inFile(file_name);
+	ifstream inFile(file_name);
 	string lineStr;
-	int count=0;
+	int count = 0;
 
-	while (getline(inFile, lineStr))  {
-	stringstream ss(lineStr);
-	string str;  
-	vector<float> lineArray;  
-	// 按照逗号分隔  
-	
-	while (getline(ss, str, ','))  
+	while (getline(inFile, lineStr))
 	{
-		lineArray.push_back(atof(str.c_str())); 	
+		stringstream ss(lineStr);
+		string str;
+		vector<float> lineArray;
+		// 按照逗号分隔
+
+		while (getline(ss, str, ','))
+		{
+			lineArray.push_back(atof(str.c_str()));
+		}
+		table_data.push_back(lineArray);
 	}
-    table_data.push_back(lineArray);
-    }
-    inFile.close();	
+	inFile.close();
 }
 
-dataRead::~dataRead() {
+void dataRead::s_dataRead(string file_name, vector<vector<float>> &table_data)
+{
+	ifstream inFile(file_name);
+	string lineStr;
+	int count = 0;
 
+	while (getline(inFile, lineStr))
+	{
+		stringstream ss(lineStr);
+		string str;
+		vector<float> lineArray;
+		// 按照逗号分隔
+
+		while (getline(ss, str, ','))
+		{
+			lineArray.push_back(atof(str.c_str()));
+		}
+		table_data.push_back(lineArray);
+	}
+	inFile.close();
+}
+void dataRead::s_dataWrite(string file_name, vector<vector<float>> &table_data)
+{
+	ofstream OpenFile(file_name);
+	if (OpenFile.fail()) 
+	{
+		// std::cout << "/* message */" << std::endl;
+		return ;
+	}
+	for(auto var : table_data)
+	{
+		for(auto item : var)
+		{
+			OpenFile<<item<<",";
+		}
+		OpenFile<<endl;
+	}
+
+	OpenFile.close();
+}
+
+dataRead::~dataRead()
+{
 }

@@ -1,4 +1,8 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <sstream>
 #include "nodeClass.hpp"
 #include "fastDtw.hpp"
 #include "dataRead.hpp"
@@ -16,17 +20,17 @@ int main(int argc, const char** argv) {
 
     magMatchBase ts1=magMatchBase();
     // ts1.magMatchBase_init(10,M_PI,data);
-    ts1.magMatchBase_init(0,7000,0.0,datafp,20);
+    ts1.magMatchBase_init(0,7000,0.0,datafp,5);
     
     cout<<ts1.finger_mark.size()<<endl;
     
-    for (size_t i = 0; i < 330; i++)
+    for (size_t i = 0; i < 335; i++)
     {
         if(testdata[i][2]<1e-9)
         {
             continue;
         }
-        if (i==30)
+        if (i==8)
         {
             cout<<"------"<<endl;
             /* code */
@@ -44,7 +48,13 @@ int main(int argc, const char** argv) {
         
     }
     ts1.print_min_seq();
+    ofstream out2f("../data/data.csv");
     // ts1.get_current_node_list();
+    for(auto var : ts1.out_put_dis)
+    {
+        out2f<<var.x<<","<<var.y<<","<<var.z<<endl;
+    }
+    out2f.close();
     
 
 }

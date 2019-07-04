@@ -18,6 +18,7 @@ void fastDtw::s__prep_input(vector<float> x, vector<float> y, FunctionName dist)
 
 void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,float *distance,vector<pair_2> &path,FunctionName dist )
 {
+    int tmp;
 
     // int max_x_y;
     if (windows.size()==0)
@@ -29,7 +30,13 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
                 windows.push_back(pair_2(i,j));
             }
         }  
+        // cout<<x.size()<<"  "<<y.size()<<endl;
     }
+    else
+    {
+        // cout<<windows.size()<<endl;
+    }
+    
     int x_max=0;
     int y_max=0;
 
@@ -50,46 +57,48 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
 
     x_max+=1;
     y_max+=1;
-    int max_x_y=max(x_max,y_max);
-    vector<float> D(max_x_y*max_x_y,MAX_INF);
+    // int max_x_y=max(x_max,y_max);
+    vector<float> D(x_max*y_max,MAX_INF);
     D[0]=0;
-    vector<int> D1(max_x_y*max_x_y,0);
-    vector<int> D2(max_x_y*max_x_y,0);
+    vector<int> D1(x_max*y_max,0);
+    vector<int> D2(x_max*y_max,0);
+    x_max-=1;
+    y_max-=1;    
     int count_s=0;
     for(auto var : windows)
     {
         int i=var.x;
         int j=var.y;
         float dt=dist(x[i-1],y[j-1]);
-        D[i*x_max+j]=min(D[(i-1)*x_max+j],D[i*x_max+j-1]);
-        D[i*x_max+j]=min(D[i*x_max+j],D[(i-1)*x_max+j-1]);
-        if(D[i*x_max+j]==D[(i-1)*x_max+j])
+        D[i*y_max+j]=min(D[(i-1)*y_max+j],D[i*y_max+j-1]);
+        D[i*y_max+j]=min(D[i*y_max+j],D[(i-1)*y_max+j-1]);
+        if(D[i*y_max+j]==D[(i-1)*y_max+j])
         {
-            D1[i*x_max+j]=i-1;
-            D2[i*x_max+j]=j;
+            D1[i*y_max+j]=i-1;
+            D2[i*y_max+j]=j;
         }
-        else if (D[i*x_max+j]==D[i*x_max+j-1])
+        else if (D[i*y_max+j]==D[i*y_max+j-1])
         {
-            D1[i*x_max+j]=i;
-            D2[i*x_max+j]=j-1;            
+            D1[i*y_max+j]=i;
+            D2[i*y_max+j]=j-1;            
         }
-        else if (D[i*x_max+j]==D[(i-1)*x_max+j-1])
+        else if (D[i*y_max+j]==D[(i-1)*y_max+j-1])
         {
-            D1[i*x_max+j]=i-1;
-            D2[i*x_max+j]=j-1;
+            D1[i*y_max+j]=i-1;
+            D2[i*y_max+j]=j-1;
         }
         else
         {
             std::cout<<"sth.wrong"<<endl;
         }
-        D[i*x_max+j]+=dt;
+        D[i*y_max+j]+=dt;
         // printf("x[%d]=%.3f,y[%d]=%.3f,dst=%.3f",x[i-1],i-1,y[i-1],j-1,dt);
         
     }
     path.clear();
     // for (int i = 0; i < D.size(); i++)
     // {
-    //     printf("(%d,%d),(%.5f,%d,%d),",int(i/x_max),i%x_max,D[i],D1[i],D2[i]);
+    //     printf("(%d,%d),(%.5f,%d,%d),",int(i/y_max),i%y_max,D[i],D1[i],D2[i]);
     // }
     // cout<<endl;
     // cout<<D.size()<<endl;
@@ -100,13 +109,17 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
     while (!(i==0 && j==0))//替代i==j==0,
     {
         path.push_back(pair_2(i-1,j-1));
-        int tmp=i*x_max+j;
+        
+
+        tmp=i*y_max+j;
+       
         i=D1[tmp];
         j=D2[tmp];
+        
         count+=1;
     }
-    *distance=D[x.size()*x_max+y.size()];
-    float dis=D[x.size()*x_max+y.size()];
+    *distance=D[x.size()*y_max+y.size()];
+    float dis=D[x.size()*y_max+y.size()];
     // cout<<"distance="<<dis<<endl;
     reverse(path.begin(),path.end());
 
@@ -143,6 +156,11 @@ void fastDtw::s__fastDtw(vector<float> x, vector<float> y,float *distance,vector
     expand_windows(new_path,x.size(),y.size(),radius);
     // cout<<"windows"<<endl;
     // for(auto var : x)
+    // {
+    //     cout<<var<<",";
+    // }
+    // cout<<endl;
+    // for(auto var : y)
     // {
     //     cout<<var<<",";
     // }

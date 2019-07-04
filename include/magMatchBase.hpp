@@ -19,12 +19,12 @@ public:
     vector<float> observation_content;
     vector<pair2_xy> track_ob;
     float COS_thre=cos(M_PI/6.0);
-    float DISTANCE_thre=3;
+    float DISTANCE_thre=5;
     float np_cos_theta=cos(15*M_PI/180);
     int adjust_len=20; //度调整的计算窗长度
-    int pro_len_angle=30;
-    int pro_fast_dtw_length=150;
-    int pro_node_extend_len=55;
+    int pro_len_angle=30;//计算的是短段的数据长度
+    int pro_fast_dtw_length=200;//长段计量的截止部分
+    int pro_node_extend_len=20;//控制多少点以内是至单独个
     vector<pair_2> _path;
     vector<int> output_result;
     magMatchBase();
@@ -47,7 +47,9 @@ private:
     vector<nodeClass*> tmp_node_list;
     vector<nodeClass*> newtmpnode_list;
     vector<vector<int>> current_node_list_result;
+    vector<float> current_node_list_info;
     nodeClass* tmpnode=nullptr;
+    unordered_set<int> start_index_list;
     void init_finger_mark(vector<vector<float>> nresult);
     // Eigen::MatrixXf tmp_mat_all_fp;
     float theta_o;
@@ -59,6 +61,7 @@ private:
     float fp_distance;
     float distance_coefficient;
     float distance_coefficient_min;
+    float distance_coefficient_min_thre;
     float fp_x;
     float fp_y;
     float included_angle;
@@ -67,6 +70,7 @@ private:
     float deta_x;
     float deta_y;
     float min_dis;
+    float max_dis;
     float dis_dif;
     float dis_dif_less;
     nodeClass* min_dis_item;
@@ -77,6 +81,9 @@ private:
     vector<float> observation_content_20;
     int tmp_node_list_size;
     int observation_content_size;
+    vector<float> dtw_dis;
+    float DTWDIS_THRE;
+    float sample_step_yaw=10*M_PI/180;
     // Eigen::MatrixXf tmp_mat;
     // MatrixXf::Index index;
 };
