@@ -43,6 +43,11 @@ void nodeClass::outFatherSeq(){
     while (cur_item!=nullptr)
     {
         /*  */
+        if (cur_item->Ignore_this_point)
+        {
+            cur_item=cur_item->father;
+            continue;
+        }
         containSeq.push_back(cur_item->node_index);
         constainX.push_back(cur_item->ob_x);
         constainY.push_back(cur_item->ob_y);

@@ -15,6 +15,7 @@ float    ob_x=0;
 float    ob_y=0;
 float _yaw=0.0;
 float _scale=1.0;
+bool Ignore_this_point=false;
 int _print_seq_cut_length=1;
 vector<int> containSeq;
 vector<float> constainX;

@@ -20,11 +20,11 @@ int main(int argc, const char** argv) {
 
     magMatchBase ts1=magMatchBase();
     // ts1.magMatchBase_init(10,M_PI,data);
-    ts1.magMatchBase_init(0,7000,0.0,datafp,5);
+    ts1.magMatchBase_init(0,7000,0.0,datafp,10);
     
     cout<<ts1.finger_mark.size()<<endl;
     
-    for (size_t i = 0; i < 335; i++)
+    for (size_t i = 0; i < 330; i++)
     {
         if(testdata[i][2]<1e-9)
         {

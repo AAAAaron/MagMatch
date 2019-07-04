@@ -13,8 +13,9 @@ class magMatchBase {
 
 public:
     vector<mag_data>  finger_mark;
+    bool isInitFinish=false;
     int _init_fm_interval=20;
-    vector<float> sl_scale{0.9,1,1.1,1.2};
+    vector<float> sl_scale{0.8,1,1.2,1.5};
     nodeClass start_node;
     vector<float> observation_content;
     vector<pair2_xy> track_ob;
@@ -22,7 +23,7 @@ public:
     float DISTANCE_thre=5;
     float np_cos_theta=cos(15*M_PI/180);
     int adjust_len=20; //度调整的计算窗长度
-    int pro_len_angle=30;//计算的是短段的数据长度
+    int pro_len_angle=25;//计算的是短段的数据长度
     int pro_fast_dtw_length=200;//长段计量的截止部分
     int pro_node_extend_len=20;//控制多少点以内是至单独个
     vector<pair_2> _path;
