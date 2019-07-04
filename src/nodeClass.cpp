@@ -51,6 +51,7 @@ void nodeClass::outFatherSeq(){
         containSeq.push_back(cur_item->node_index);
         constainX.push_back(cur_item->ob_x);
         constainY.push_back(cur_item->ob_y);
+        constainYaw.push_back(cur_item->_yaw);
         cur_item=cur_item->father;
     }
     reverse(containSeq.begin(),containSeq.end());

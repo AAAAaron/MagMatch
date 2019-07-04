@@ -24,7 +24,7 @@ int main(int argc, const char** argv) {
     
     cout<<ts1.finger_mark.size()<<endl;
     
-    for (size_t i = 0; i < 330; i++)
+    for (size_t i = 0; i <150; i++)
     {
         if(testdata[i][2]<1e-9)
         {
@@ -47,6 +47,7 @@ int main(int argc, const char** argv) {
         // }
         
     }
+    ts1.print_min_seq_yaw();
     ts1.print_min_seq();
     ofstream out2f("../data/data.csv");
     // ts1.get_current_node_list();

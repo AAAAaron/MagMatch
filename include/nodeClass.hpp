@@ -20,6 +20,7 @@ int _print_seq_cut_length=1;
 vector<int> containSeq;
 vector<float> constainX;
 vector<float> constainY;
+vector<float> constainYaw;
     nodeClass();
     nodeClass(int node_index);
     void appendNode(nodeClass* child);

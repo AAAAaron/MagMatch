@@ -152,6 +152,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         }
         
         distance_coefficient_min=1e+9;
+        included_angle_max=COS_thre;
         for(int fp_index=0;fp_index<finger_mark.size();fp_index++)
         {
             
@@ -162,35 +163,39 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                     fp_x=finger_mark[fp_index].x-finger_mark[leaf_node->node_index].x;
                     fp_y=finger_mark[fp_index].y-finger_mark[leaf_node->node_index].y;
                     fp_distance=sqrtf(fp_x*fp_x+fp_y*fp_y);
-                    included_angle=(ob_dis_x_y[0]*fp_x+fp_y*ob_dis_x_y[1])/(ob_distance*fp_distance);
+                    if(fp_distance<1e-8)
+                    {
+                        continue;
+                    }
+                    included_angle=(ob_dis_x_y[0]*fp_x+fp_y*ob_dis_x_y[1])/fp_distance;
                     deta_x=leaf_node->ob_x+fp_x;
                     deta_y=leaf_node->ob_y+fp_y;
-                    if (included_angle>COS_thre)
+                     distance_coefficient=abs(ob_distance*leaf_node->_scale-fp_distance)/(ob_distance*leaf_node->_scale);
+                    if (distance_coefficient<0.5 && included_angle>included_angle_max)
                     {
-                        distance_coefficient=abs(ob_distance*leaf_node->_scale-fp_distance)/(ob_distance*leaf_node->_scale);
+                       
                         if(tmp_node_list_size>pro_node_extend_len || observation_content_size<20){
-                            if (distance_coefficient<0.3 && distance_coefficient<distance_coefficient_min)
-                            {
-                                tmpnode->node_index=fp_index;
-                                tmpnode->_yaw=leaf_node->_yaw;
-                                tmpnode->_scale=leaf_node->_scale;
-                                tmpnode->ob_x=deta_x;
-                                tmpnode->ob_y=deta_y;                            
-                                distance_coefficient_min=distance_coefficient;
-                            }
+                            tmpnode->node_index=fp_index;
+                            tmpnode->_yaw=leaf_node->_yaw;
+                            tmpnode->_scale=leaf_node->_scale;
+                            // tmpnode->_scale=1.0/included_angle;
+                            tmpnode->ob_x=deta_x;
+                            tmpnode->ob_y=deta_y;                            
+                            included_angle_max=included_angle;
+                            
                         }
                         else
                         {
-                            if (abs(distance_coefficient)<0.2)
-                            {
-                                tmpnode=new nodeClass(fp_index);
-                                tmpnode->_yaw=leaf_node->_yaw;
-                                tmpnode->_scale=leaf_node->_scale;
-                                tmpnode->ob_x=deta_x;
-                                tmpnode->ob_y=deta_y;                            
-                                leaf_node->appendNode(tmpnode);
-                                newtmpnode_list.push_back(tmpnode);     
-                            }                       
+
+                            tmpnode=new nodeClass(fp_index);
+                            tmpnode->_yaw=leaf_node->_yaw;
+                            tmpnode->_scale=leaf_node->_scale;
+                            // tmpnode->_scale=1.0/included_angle;
+                            tmpnode->ob_x=deta_x;
+                            tmpnode->ob_y=deta_y;                            
+                            leaf_node->appendNode(tmpnode);
+                            newtmpnode_list.push_back(tmpnode);     
+                                                  
                         }  
                     }
                 }
@@ -198,7 +203,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         }
         //单次的时候前面预置了，这个根据查询情况，看是否存入
         if(tmp_node_list_size>pro_node_extend_len || observation_content_size<20){
-            if (distance_coefficient_min<1e+9)//单次且有
+            if (included_angle_max>COS_thre)//单次且有
             {
                 leaf_node->appendNode(tmpnode);
                 newtmpnode_list.push_back(tmpnode);
@@ -320,7 +325,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                             else{
                                 item->_yaw=tmpyaw2;
                             }
-                            item->_yaw=tmpyaw1;
+                            // item->_yaw=tmpyaw1;
                             if (cos(item->_yaw-item->father->_yaw)<np_cos_theta)
                             {
                                 item->_yaw=item->father->_yaw;
@@ -467,6 +472,16 @@ vector<vector<int>> magMatchBase::get_current_node_list()
         cout<<endl;
     }
     return current_node_list_result;
+}
+void magMatchBase::print_min_seq_yaw()
+{
+    printf("now the node_index is %d,dis=%.3f,scale=%.3f,yaw=%.3f\r\n",min_dis_item->node_index,min_dis_item->node_probability,min_dis_item->_scale,min_dis_item->_yaw);
+    // cout<<" "<<min_dis_item->node_index<<"dis="<<min_dis_item->node_probability<<endl;
+    for(auto var : min_dis_item->constainYaw)
+    {
+        cout<<var<<",";
+    }
+    cout<<endl;
 }
 void magMatchBase::print_min_seq()
 {
