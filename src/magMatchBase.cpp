@@ -140,6 +140,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
  
     for(nodeClass* leaf_node : tmp_node_list)
     {
+        // cout<<"yaw="<<leaf_node->_yaw<<"scale="<<leaf_node->_scale<<" ";
         if (observation_content.size()>8)
         {
             /* code */
@@ -384,8 +385,8 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                 tmpnode->ob_x=tmp_node_list[tmp_leaf_node_index]->ob_x;
                 tmpnode->ob_y=tmp_node_list[tmp_leaf_node_index]->ob_y;
                 tmpnode->Ignore_this_point=true;
-                if (tmpnode->_scale > 1.5){
-                    tmpnode->_scale = 1.5;
+                if (tmpnode->_scale > 1.3){
+                    tmpnode->_scale = 1.3;
                 }
                 if (tmpnode->_scale < 1){//由于选择的线是原来的旋转，所以肯定是变长了
                     tmpnode->_scale = 1;
@@ -437,11 +438,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("'time speend %.3f\r\n'" , speend_time);
     out_put_dis.push_back(pair_3<float>(newtmpnode_list.size(), out_tmp_dis, speend_time));
-        printf("--------------------------%ld---------------now the start is %d",start_index_list.size(),*start_index_list.begin());
+        printf("--------------------------%ld---------------now the start is %d\r\n",start_index_list.size(),*start_index_list.begin());
 
     if (start_index_list.size()==1)
     {
-        printf("-----------------------------------------now the start is %d",*start_index_list.begin());
+        printf("-----------------------------------------now the start is %d\r\n",*start_index_list.begin());
         isInitFinish=true;
     }
     else
@@ -450,7 +451,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         for(auto item : tmp_node_list)
         {
             start_index_list.insert(item->node_start);
-        }        
+        }       
+        for(auto var : start_index_list)
+        {
+            cout<<var<<",";
+        } 
     }    
 
     return out_tmp_dis;
@@ -477,9 +482,10 @@ void magMatchBase::print_min_seq_yaw()
 {
     printf("now the node_index is %d,dis=%.3f,scale=%.3f,yaw=%.3f\r\n",min_dis_item->node_index,min_dis_item->node_probability,min_dis_item->_scale,min_dis_item->_yaw);
     // cout<<" "<<min_dis_item->node_index<<"dis="<<min_dis_item->node_probability<<endl;
-    for(auto var : min_dis_item->constainYaw)
+    cout<<endl;
+    for(auto var : min_dis_item->constainInfo)
     {
-        cout<<var<<",";
+        cout<<var[0]<<","<<var[0]<<","<<var[2]<<","<<var[3]<<","<<endl;
     }
     cout<<endl;
 }
@@ -493,7 +499,10 @@ void magMatchBase::print_min_seq()
     }
     cout<<endl;
 }
-
+void magMatchBase::get_current_node_info2(string filename)
+{
+    dataRead::s_dataWrite(filename,min_dis_item->constainInfo);
+}
 magMatchBase::~magMatchBase() {
     // if(tmpnode!=nullptr)
     // {

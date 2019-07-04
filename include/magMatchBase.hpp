@@ -9,20 +9,21 @@
 #include "nodeClass.hpp"
 #include "math.h"
 #include "fastDtw.hpp"
+#include "dataRead.hpp"
 class magMatchBase {
 
 public:
     vector<mag_data>  finger_mark;
     bool isInitFinish=false;
     int _init_fm_interval=20;
-    vector<float> sl_scale{0.8,1,1.2,1.5};
+    vector<float> sl_scale{0.8,1,1.2,1.4};
     nodeClass start_node;
     vector<float> observation_content;
     vector<pair2_xy> track_ob;
     float COS_thre=cos(M_PI/6.0);
-    float DISTANCE_thre=5;
-    float np_cos_theta=cos(15*M_PI/180);
-    int adjust_len=15; //度调整的计算窗长度
+    float DISTANCE_thre=4;
+    float np_cos_theta=cos(5*M_PI/180);
+    int adjust_len=20; //度调整的计算窗长度
     int pro_len_angle=25;//计算的是短段的数据长度
     int pro_fast_dtw_length=200;//长段计量的截止部分
     int pro_node_extend_len=20;//控制多少点以内是至单独个
@@ -37,6 +38,7 @@ public:
     vector<vector<int>> get_current_node_list();
     int get_current_node_index();
     int get_current_node_count();
+    void get_current_node_info2(string filename);
     void print_min_seq_yaw();
     void print_min_seq();
     ~magMatchBase();

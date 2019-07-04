@@ -53,10 +53,20 @@ void dataRead::s_dataWrite(string file_name, vector<vector<float>> &table_data)
 	}
 	for(auto var : table_data)
 	{
-		for(auto item : var)
+		for (size_t i = 0; i < var.size(); i++)
 		{
-			OpenFile<<item<<",";
+			if(i==var.size()-1)
+			{
+				OpenFile<<var[i];
+			}
+			else
+			{
+				OpenFile<<var[i]<<",";
+			}
+			
+			
 		}
+		
 		OpenFile<<endl;
 	}
 

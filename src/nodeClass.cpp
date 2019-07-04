@@ -37,8 +37,7 @@ void nodeClass::appendNode(nodeClass* child){
 
 void nodeClass::outFatherSeq(){
     containSeq.clear();
-    constainX.clear();
-    constainY.clear();
+    constainInfo.clear();
     nodeClass* cur_item=this;
     while (cur_item!=nullptr)
     {
@@ -49,17 +48,22 @@ void nodeClass::outFatherSeq(){
             continue;
         }
         containSeq.push_back(cur_item->node_index);
-        constainX.push_back(cur_item->ob_x);
-        constainY.push_back(cur_item->ob_y);
-        constainYaw.push_back(cur_item->_yaw);
+        vector<float> tmp;
+        tmp.push_back(cur_item->ob_x);
+        tmp.push_back(cur_item->ob_y);
+        tmp.push_back(cur_item->_scale);
+        tmp.push_back(cur_item->_yaw);
+        constainInfo.push_back(tmp);
         cur_item=cur_item->father;
     }
     reverse(containSeq.begin(),containSeq.end());
+    reverse(constainInfo.begin(),constainInfo.end());
     for (size_t _ = 0; _ <_print_seq_cut_length ; _++)
     {
         if(containSeq.size()>=1)
         {
              containSeq.erase(containSeq.begin());
+             constainInfo.erase(constainInfo.begin());
         }
     }
     

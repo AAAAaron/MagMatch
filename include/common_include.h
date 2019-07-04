@@ -19,8 +19,8 @@ using namespace std;
 // template <class T>
 float static _define_random_rand()
 {
-    srand((int)time(0));
-    return rand()/RAND_MAX;
+    // srand((unsigned)time(NULL));
+    return rand() / double(RAND_MAX);
     
 };
 struct pair_2

@@ -18,9 +18,8 @@ float _scale=1.0;
 bool Ignore_this_point=false;
 int _print_seq_cut_length=1;
 vector<int> containSeq;
-vector<float> constainX;
-vector<float> constainY;
-vector<float> constainYaw;
+
+vector<vector<float>> constainInfo;
     nodeClass();
     nodeClass(int node_index);
     void appendNode(nodeClass* child);
