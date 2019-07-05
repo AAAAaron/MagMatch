@@ -33,10 +33,12 @@ public:
     magMatchBase();
     void magMatchBase_init(int init_node_index,float yaw,vector<vector<float>> nresult,int init_fm_interval=20);
     void magMatchBase_init(vector<int> init_node_indexs,vector<float> yaws,vector<vector<float>> nresult,int init_fm_interval=20);
+    bool magMatchBase_init(vector<vector<float>>nresult,int init_fm_interval=20);
     void magMatchBase_init(int start_index,int end_index,float yaw,vector<vector<float>> nresult,int init_fm_interval=20);
     bool init_add_item(int init_node_index,float yaw);
     float processData(float ob_distance,float epoch_angle,float magnetic_norm);
     vector<vector<int>> get_current_node_list();
+    vector<float> get_current_result();
     int get_current_node_index();
     int get_current_node_count();
     void get_current_node_info2(string filename);

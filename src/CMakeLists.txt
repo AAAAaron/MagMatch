@@ -3,6 +3,7 @@ add_library( MagMatch SHARED
   fastDtw.cpp
   magMatchBase.cpp
   dataRead.cpp
+  mktMM.cpp
 )
 
 target_link_libraries( MagMatch

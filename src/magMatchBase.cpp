@@ -30,6 +30,31 @@ void magMatchBase::magMatchBase_init(vector<int> init_node_indexs,vector<float> 
     track_ob.push_back(pair2_xy(0,0)); 
     metro_karlo_tree.push_back(mkt_nodes);
 }
+bool magMatchBase::magMatchBase_init(vector<vector<float>>nresult,int init_fm_interval)
+{
+    if (nresult.size()==0)
+    {
+        return false;
+    }
+    
+    vector<int> mkt_nodes;
+    start_node=nodeClass(-1);
+    start_node._print_seq_cut_length=2;
+    _init_fm_interval=init_fm_interval;
+    init_finger_mark(nresult);
+    
+    for (size_t i = 0; i < nresult.size(); i++)
+    {
+        if (i%init_fm_interval==0)
+        {
+            init_add_item(i,0.0);
+            mkt_nodes.push_back(i);
+        }
+    }
+    track_ob.push_back(pair2_xy(0,0)); 
+    metro_karlo_tree.push_back(mkt_nodes);  
+    return true;  
+}
 void magMatchBase::magMatchBase_init(int start_index,int end_index,float yaw,vector<vector<float>> nresult,int init_fm_interval)
 {
     vector<int> mkt_nodes;
@@ -444,7 +469,6 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     printf("'time speend %.3f\r\n'" , speend_time);
     out_put_dis.push_back(pair_3<float>(newtmpnode_list.size(), out_tmp_dis, speend_time));
         printf("--------------------------%ld---------------now the start is %d\r\n",start_index_list.size(),*start_index_list.begin());
-
     if (start_index_list.size()==1)
     {
         printf("-----------------------------------------now the start is %d\r\n",*start_index_list.begin());
@@ -521,6 +545,29 @@ void magMatchBase::get_current_node_info2(string filename)
 void magMatchBase::print_metro_karlo_tree(string filename)
 {
     dataRead::s_dataWrite(filename,metro_karlo_tree);
+}
+
+vector<float> magMatchBase::get_current_result()
+{
+    vector<float> result;
+    if (min_dis_item==nullptr)
+    {
+        return result;
+    }
+    
+    
+    if (isInitFinish)//初始化状态
+    {
+        result.push_back(1);
+    }
+    else
+    {
+        result.push_back(0);
+    }
+    result.push_back(min_dis_item->node_probability);
+    result.push_back(finger_mark[min_dis_item->node_index].x);
+    result.push_back(finger_mark[min_dis_item->node_index].y);
+    return result;
 }
 
 magMatchBase::~magMatchBase() {
