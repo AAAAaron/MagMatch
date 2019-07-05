@@ -29,6 +29,7 @@ public:
     int pro_node_extend_len=20;//控制多少点以内是至单独个
     vector<pair_2> _path;
     vector<int> output_result;
+    vector<vector<int>> metro_karlo_tree;
     magMatchBase();
     void magMatchBase_init(int init_node_index,float yaw,vector<vector<float>> nresult,int init_fm_interval=20);
     void magMatchBase_init(vector<int> init_node_indexs,vector<float> yaws,vector<vector<float>> nresult,int init_fm_interval=20);
@@ -41,6 +42,7 @@ public:
     void get_current_node_info2(string filename);
     void print_min_seq_yaw();
     void print_min_seq();
+    void print_metro_karlo_tree(string filename);
     ~magMatchBase();
     float out_tmp_dis;
     vector<pair_3<float>> out_put_dis;
@@ -78,7 +80,7 @@ private:
     float max_dis;
     float dis_dif;
     float dis_dif_less;
-    nodeClass* min_dis_item;
+    nodeClass* min_dis_item=nullptr;
     float min_dis_less;
     float _distance;
     vector<float> fp_mag;

@@ -24,7 +24,7 @@ int main(int argc, const char** argv) {
     
     cout<<ts1.finger_mark.size()<<endl;
     
-    for (size_t i = 0; i <330; i++)
+    for (size_t i = 0; i <336; i++)
     {
         if(testdata[i][2]<1e-9)
         {
@@ -48,6 +48,7 @@ int main(int argc, const char** argv) {
         
     }
     ts1.get_current_node_info2("../data/info.csv");
+    ts1.print_metro_karlo_tree("../data/mkt.txt");
     ts1.print_min_seq();
     ofstream out2f("../data/data.csv");
     // ts1.get_current_node_list();

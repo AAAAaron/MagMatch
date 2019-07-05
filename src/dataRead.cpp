@@ -43,7 +43,36 @@ void dataRead::s_dataRead(string file_name, vector<vector<float>> &table_data)
 	}
 	inFile.close();
 }
-void dataRead::s_dataWrite(string file_name, vector<vector<float>> &table_data)
+void dataRead::s_dataWrite(string file_name, vector<vector<float>> table_data)
+{
+	ofstream OpenFile(file_name);
+	if (OpenFile.fail()) 
+	{
+		// std::cout << "/* message */" << std::endl;
+		return ;
+	}
+	for(auto var : table_data)
+	{
+		for (size_t i = 0; i < var.size(); i++)
+		{
+			if(i==var.size()-1)
+			{
+				OpenFile<<var[i];
+			}
+			else
+			{
+				OpenFile<<var[i]<<",";
+			}
+			
+			
+		}
+		
+		OpenFile<<endl;
+	}
+
+	OpenFile.close();
+}
+void dataRead::s_dataWrite(string file_name, vector<vector<int>> table_data)
 {
 	ofstream OpenFile(file_name);
 	if (OpenFile.fail()) 

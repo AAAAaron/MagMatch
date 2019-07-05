@@ -16,6 +16,7 @@ void magMatchBase::magMatchBase_init(int init_node_index,float yaw,vector<vector
 }
 void magMatchBase::magMatchBase_init(vector<int> init_node_indexs,vector<float> yaws,vector<vector<float>> nresult,int init_fm_interval)
 {
+    vector<int> mkt_nodes;
     start_node=nodeClass(-1);
     start_node._print_seq_cut_length=2;
     _init_fm_interval=init_fm_interval;
@@ -24,11 +25,14 @@ void magMatchBase::magMatchBase_init(vector<int> init_node_indexs,vector<float> 
     for (size_t i = 0; i < init_node_indexs.size(); i++)
     {
         init_add_item(init_node_indexs[i],yaws[i]);
+        mkt_nodes.push_back(init_node_indexs[i]);
     }
     track_ob.push_back(pair2_xy(0,0)); 
+    metro_karlo_tree.push_back(mkt_nodes);
 }
 void magMatchBase::magMatchBase_init(int start_index,int end_index,float yaw,vector<vector<float>> nresult,int init_fm_interval)
 {
+    vector<int> mkt_nodes;
     start_node=nodeClass(-1);
     start_node._print_seq_cut_length=2;
     _init_fm_interval=init_fm_interval;
@@ -39,9 +43,11 @@ void magMatchBase::magMatchBase_init(int start_index,int end_index,float yaw,vec
         if (i%init_fm_interval==0)
         {
             init_add_item(i,yaw);
+            mkt_nodes.push_back(i);
         }
     }
     track_ob.push_back(pair2_xy(0,0)); 
+    metro_karlo_tree.push_back(mkt_nodes);
 }
 
 bool magMatchBase::init_add_item(int init_node_index,float yaw)
@@ -90,7 +96,7 @@ void magMatchBase::init_finger_mark(vector<vector<float>> nresult)
     float speend_time;
 float magMatchBase::processData(float ob_distance,float epoch_angle,float magnetic_norm)
 {
-
+    vector<int> mkt_nodes;
     //多的时候就先预置一个，然后找到最小的替换这个，最后append
     tmp_node_list_size=tmp_node_list.size();
     observation_content_size=observation_content.size();  
@@ -356,7 +362,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         printf("min dis %.3f\r\n,scale=%.3f,yaw=%.3f", min_dis,min_dis_item->_scale,min_dis_item->_yaw);
         // # print(min_dis_item.node_index)
         // # print(min_dis_item.node_start)
-        output_result.push_back(min_dis_item->node_index);
+        // output_result.push_back(min_dis_item->node_index);
         out_tmp_dis = min_dis;
     }
     else
@@ -415,7 +421,6 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                 tmpnode->_yaw=newtmpnode_list[tmp_leaf_node_index]->_yaw+(_define_random_rand()*2-1)*sample_step_yaw*2;
                 tmpnode->ob_x=newtmpnode_list[tmp_leaf_node_index]->ob_x;
                 tmpnode->ob_y=newtmpnode_list[tmp_leaf_node_index]->ob_y;
-                tmpnode->Ignore_this_point=true;
                 if (tmpnode->_scale > 1.5){
                     tmpnode->_scale = 1.5;
                 }
@@ -457,7 +462,15 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
             cout<<var<<",";
         } 
     }    
-
+    for(auto item : tmp_node_list)
+    {
+        mkt_nodes.push_back(item->node_index);
+    }
+    if( min_dis_item!=nullptr){
+        mkt_nodes.push_back(min_dis_item->node_index);
+    }
+    
+    metro_karlo_tree.push_back(mkt_nodes);
     return out_tmp_dis;
 }
 
@@ -499,10 +512,17 @@ void magMatchBase::print_min_seq()
     }
     cout<<endl;
 }
+
 void magMatchBase::get_current_node_info2(string filename)
 {
     dataRead::s_dataWrite(filename,min_dis_item->constainInfo);
 }
+
+void magMatchBase::print_metro_karlo_tree(string filename)
+{
+    dataRead::s_dataWrite(filename,metro_karlo_tree);
+}
+
 magMatchBase::~magMatchBase() {
     // if(tmpnode!=nullptr)
     // {
