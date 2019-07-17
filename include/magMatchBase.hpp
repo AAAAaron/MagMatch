@@ -13,6 +13,7 @@
 class magMatchBase {
 
 public:
+    long mJavaObj = -1;
     vector<mag_data>  finger_mark;
     bool isInitFinish=false;
     int _init_fm_interval=20;
@@ -43,11 +44,11 @@ public:
     vector<float> get_current_result();
     int get_current_node_index();
     int get_current_node_count();
-    void get_current_node_info2(string filename);
+    void get_current_node_info2(const char* filename);
     void print_min_seq_yaw();
     void print_min_seq();
-    void print_metro_karlo_tree(string filename);
-    void print_metro_karlo_tree_distance(string filename);
+    void print_metro_karlo_tree(const char* filename);
+    void print_metro_karlo_tree_distance(const char* filename);
     ~magMatchBase();
     float out_tmp_dis;
     vector<pair_3<float>> out_put_dis;
@@ -60,7 +61,7 @@ private:
     vector<vector<int>> current_node_list_result;
     vector<float> current_node_list_info;
     nodeClass* tmpnode=nullptr;
-    unordered_set<int> start_index_list;
+    std::unordered_set<int> start_index_list;
     void init_finger_mark(vector<vector<float>> nresult);
     // Eigen::MatrixXf tmp_mat_all_fp;
     float theta_o;

@@ -16,7 +16,7 @@ LOCAL_SRC_FILES := src/dataRead.cpp src/fastDtw.cpp  src/magMatchBase.cpp src/mk
 LOCAL_C_INCLUDES := $(NDKROOT)/sources/cxx-stl/stlport/stlport/
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
-LOCAL_C_INCLUDES += /usr/include/eigen3/
+# LOCAL_C_INCLUDES += /usr/include/eigen3/
 # OpenCV
 # OPENCV_CAMERA_MODULES:=on
 # OPENCV_INSTALL_MODULES:=on

@@ -106,6 +106,7 @@ bool magMatchBase::init_add_item(int init_node_index,float yaw)
        
     }
     start_index_list.insert(init_node_index);
+    return true;
     
 }
 
@@ -618,16 +619,16 @@ void magMatchBase::print_min_seq()
     cout<<endl;
 }
 
-void magMatchBase::get_current_node_info2(string filename)
+void magMatchBase::get_current_node_info2(const char* filename)
 {
     dataRead::s_dataWrite(filename,min_dis_item->constainInfo);
 }
 
-void magMatchBase::print_metro_karlo_tree(string filename)
+void magMatchBase::print_metro_karlo_tree(const char* filename)
 {
     dataRead::s_dataWrite(filename,metro_karlo_tree);
 }
-void magMatchBase::print_metro_karlo_tree_distance(string filename)
+void magMatchBase::print_metro_karlo_tree_distance(const char* filename)
 {
     dataRead::s_dataWrite(filename,metro_karlo_tree_dis);
 }

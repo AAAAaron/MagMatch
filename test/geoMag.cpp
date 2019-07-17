@@ -21,7 +21,7 @@ int main(int argc, const char** argv) {
     magMatchBase ts1=magMatchBase();
     // ts1.magMatchBase_init(10,M_PI,data);
     // ts1.magMatchBase_init(4000,5000,0.0,datafp,10);
-    ts1.magMatchBase_init(datafp,12);
+    ts1.magMatchBase_init(datafp);
     cout<<ts1.finger_mark.size()<<endl;
     
     for (size_t i = 0; i <testdata.size(); i++)
