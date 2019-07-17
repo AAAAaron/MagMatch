@@ -357,7 +357,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         }
         else//newnode里面没东西的时候就吧上次的弄过来
         {
-            tmp_node_list.push_back(min_dis_item);
+            if (min_dis_item!=nullptr)
+            {
+                tmp_node_list.push_back(min_dis_item);
+            }
+            
         }
         
         t2 = clock();

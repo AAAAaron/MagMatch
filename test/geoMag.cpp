@@ -13,18 +13,18 @@ int main(int argc, const char** argv) {
 
     vector<vector<float>> datafp,testdata;
     string filename="/home/aaron/project/MapMatching/data/allSecD_nohead.csv";
-    string filetest="/media/aaron/新加卷/工作记录/项目产出及记录/19年羲和后台过程归档/第二阶段材料整理/测试过程/iosFp/my_iOS_device_2019-06-26_16-48-43_+0800data.csv";
+    string filetest="/media/aaron/新加卷/工作记录/项目产出及记录/19年羲和后台过程归档/第二阶段材料整理/测试过程/android/pdata2/773.csv";
     dataRead DR=dataRead(filename,datafp);
     dataRead::s_dataRead(filetest,testdata);
     printf("%ldX%ld\r\n",testdata.size(),testdata[0].size());
 
     magMatchBase ts1=magMatchBase();
     // ts1.magMatchBase_init(10,M_PI,data);
-    ts1.magMatchBase_init(0,7000,0.0,datafp,12);
-    
+    // ts1.magMatchBase_init(4000,5000,0.0,datafp,10);
+    ts1.magMatchBase_init(datafp,12);
     cout<<ts1.finger_mark.size()<<endl;
     
-    for (size_t i = 0; i <336; i++)
+    for (size_t i = 0; i <testdata.size(); i++)
     {
         if(testdata[i][2]<1e-9)
         {
@@ -49,6 +49,7 @@ int main(int argc, const char** argv) {
     }
     ts1.get_current_node_info2("../data/info.csv");
     ts1.print_metro_karlo_tree("../data/mkt.txt");
+    ts1.print_metro_karlo_tree_distance("../data/mktd.txt");
     ts1.print_min_seq();
     ofstream out2f("../data/data.csv");
     // ts1.get_current_node_list();
