@@ -62,8 +62,8 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
     D[0]=0;
     vector<int> D1(x_max*y_max,0);
     vector<int> D2(x_max*y_max,0);
-    x_max-=1;
-    y_max-=1;    
+    // x_max-=1;//很严重的一个bug
+    // y_max-=1;    
     int count_s=0;
     for(auto var : windows)
     {
@@ -100,8 +100,8 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
     // {
     //     printf("(%d,%d),(%.5f,%d,%d),",int(i/y_max),i%y_max,D[i],D1[i],D2[i]);
     // }
-    // cout<<endl;
-    // cout<<D.size()<<endl;
+    // std::cout<<endl;
+    // std::cout<<D.size()<<endl;
     int i=x.size();
     int j=y.size();
     vector<int> rx,ry;
@@ -112,11 +112,12 @@ void fastDtw::s__dtw(vector<float> x, vector<float> y,vector<pair_2> &windows,fl
         
 
         tmp=i*y_max+j;
-       
+    //    std::cout<<i << "/*ij/"<<j << std::endl;
         i=D1[tmp];
         j=D2[tmp];
         
         count+=1;
+        
     }
     *distance=D[x.size()*y_max+y.size()];
     float dis=D[x.size()*y_max+y.size()];
@@ -150,23 +151,38 @@ void fastDtw::s__fastDtw(vector<float> x, vector<float> y,float *distance,vector
     // {
     //     printf("(%d,%d),",var.x,var.y);
     // }
-    // cout<<endl;
-    // cout<<x.size()<<" "<<y.size()<<endl;
+    // std::cout<<endl;
+    // std::cout<<x.size()<<" "<<y.size()<<endl;
 
+
+        // cout<<"--ooooxxxxxxooooo------"<<endl;
+        // cout<<x.size()<<"sds"<<y.size()<<endl;
+        // for(auto var : new_path)
+        // {
+        //     cout<<var.x<<"----"<<var.y<<",";
+        // }
+        // cout<<endl;
+    
+    
     expand_windows(new_path,x.size(),y.size(),radius);
-    // cout<<"windows"<<endl;
+    // std::cout<<"windows"<<endl;
     // for(auto var : x)
     // {
-    //     cout<<var<<",";
+    //     std::cout<<var<<",";
     // }
-    // cout<<endl;
+    // std::cout<<endl;
     // for(auto var : y)
     // {
-    //     cout<<var<<",";
+    //     std::cout<<var<<",";
     // }
-    // cout<<endl;
-    // cout<<"--ooooooooo------"<<endl;
-
+    // std::cout<<endl;
+    // std::cout<<"--ooooooooo------"<<endl;
+    // std::cout<<x.size()<<"sds"<<y.size()<<endl;
+    // for(auto var : new_path)
+    // {
+    //     std::cout<<var.x<<"----"<<var.y<<",";
+    // }
+    // std::cout<<endl;
 
 
     s__dtw(x,y,new_path,distance,path,dist);
@@ -206,14 +222,14 @@ void  fastDtw::expand_windows(vector<pair_2> &path,int len_x,int len_y,int radiu
         }        
     }
 
-    // cout<<"--cccccccccccccc---"<<endl;
+    // std::cout<<"--cccccccccccccc---"<<endl;
 
     // for(auto var : path_)
     // {
     //      printf("(%d,%d),",var.x,var.y);
     // }
-    // cout<<endl;
-    // cout<<path_.size()<<endl;
+    // std::cout<<endl;
+    // std::cout<<path_.size()<<"xxxx"<<path.size()<<endl;
     
 
     unordered_set<pair_2,pair_2_int_hash> windows;
@@ -228,13 +244,14 @@ void  fastDtw::expand_windows(vector<pair_2> &path,int len_x,int len_y,int radiu
         windows.insert(pair_2(i*2+1,j*2+1));        
         // cout<<windows.size()<<endl;
     }
-    // cout<<"--dddddddddddd---"<<endl;
-    // cout<<windows.size()<<endl;
+    // std::cout<<"--dddddddddddd---"<<endl;
+    
     // for(auto var : windows)
     // {
     //      printf("(%d,%d),",var.x,var.y);
     // }
-    // cout<<endl;
+    // std::cout<<endl;
+    // std::cout<<windows.size()<<endl;
     
 
     path.clear();
@@ -264,7 +281,14 @@ void  fastDtw::expand_windows(vector<pair_2> &path,int len_x,int len_y,int radiu
         }
         start_j=new_start_j;
     }
+    // std::cout<<"--fffffffff---"<<endl;
     
+    // for(auto var : path)
+    // {
+    //      printf("(%d,%d),",var.x,var.y);
+    // }
+    // std::cout<<endl;
+    // std::cout<<path.size()<<endl;    
     
     
 }
