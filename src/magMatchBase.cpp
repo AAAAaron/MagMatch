@@ -98,7 +98,7 @@ bool magMatchBase::init_add_item(int init_node_index,float yaw)
             ts->_yaw=yaw;
             ts->_scale=var;
             ts->ob_x=finger_mark[init_node_index].x;
-            ts->ob_y=finger_mark[init_node_index].x;
+            ts->ob_y=finger_mark[init_node_index].y;
             start_node.appendNode(ts);
             ts->node_start=init_node_index;
             tmp_node_list.push_back(ts);            
