@@ -10,6 +10,7 @@
 #include "math.h"
 #include "fastDtw.hpp"
 #include "dataRead.hpp"
+#include <omp.h> 
 class magMatchBase {
 
 public:
@@ -28,7 +29,7 @@ public:
     int pro_len_angle=25;//计算的是短段的数据长度
     int pro_fast_dtw_length=200;//长段计量的截止部分
     int pro_node_extend_len=20;//控制多少点以内是至单独个
-    vector<pair_2> _path;
+    
     vector<int> output_result;
     float last_length=0;
     vector<vector<int>> metro_karlo_tree;
@@ -88,13 +89,16 @@ private:
     float dis_dif_less;
     nodeClass* min_dis_item=nullptr;
     float min_dis_less;
-    float _distance;
     vector<float> fp_mag;
     vector<float> fp_mag_20;
     vector<float> observation_content_20;
+    vector<pair_2> _path;
+    float _distance =0.0;
+    
     int tmp_node_list_size;
     int observation_content_size;
     vector<float> dtw_dis;
+    int dtw_dis_length=0;
     float DTWDIS_THRE;
     float sample_step_yaw=10*M_PI/180;
     // Eigen::MatrixXf tmp_mat;

@@ -197,6 +197,7 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         
         distance_coefficient_min=1e+9;
         included_angle_max=COS_thre;
+        // #pragma omp parallel for
         for(int fp_index=0;fp_index<finger_mark.size();fp_index++)
         {
             
@@ -262,7 +263,9 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("节点生成　time speend %.3f\r\n'" , speend_time);
     min_dis = 1e+9;
+    max_dis=-1e+9;
     min_dis_less=1e+9; 
+
     if (newtmpnode_list.size()==0)
     {
         /* code */
@@ -276,9 +279,15 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
     // int count_size_300=0;
     if (observation_content.size()>8)
     {
-        dtw_dis.clear();
-        for(nodeClass* var : newtmpnode_list)
+        // dtw_dis.clear();
+        // #pragma omp parallel for 
+        for(unsigned int var_i = 0; var_i <newtmpnode_list.size();var_i++)
+        // for(nodeClass* var : newtmpnode_list)
         {
+
+            nodeClass* var=newtmpnode_list[var_i];
+            // cout<<"var"<<var_i<<"    !"<<endl;
+            // cout<<"ssv"<<var->node_index<<"s"<<endl;
             // if (newtmpnode_list.size()>900)
             // {
             //     if(count_size_300%(int(newtmpnode_list.size()/300))!=0)
@@ -287,8 +296,13 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
             //     }
             // }
             // count_size_300++;
+
+            // float min_dis_subthread=0.0;
+            // nodeClass* min_dis_item_subthread=nullptr;
+            
             fp_mag.clear();
             _path.clear();
+            observation_content_20.clear();
             for(int seq_index : var->containSeq)
             {
                 fp_mag.push_back(finger_mark[seq_index].mmagn);
@@ -305,18 +319,21 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
             {
                 fastDtw::fastdtw(observation_content,fp_mag,&_distance,_path);               
             }
-            
-            
-
 
             var->node_probability=_distance;
             if (_distance<min_dis)
             {
                 min_dis=_distance;
-                min_dis_item=var;
+                min_dis_item=newtmpnode_list[var_i];
+            }
+            if(_distance>max_dis)
+            {
+                max_dis=_distance;
             }
             // cout<<_distance<<"--";
-            dtw_dis.push_back(_distance);
+
+            // #pragma omp critical (dtw_dis)
+            // dtw_dis.push_back(_distance);
             if(observation_content.size()>pro_len_angle+1)
             {
                 fp_mag_20.clear();
@@ -328,13 +345,19 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
                 if (_distance<min_dis_less)
                 {
                     min_dis_less=_distance;
-                }
-                
+                }                
             }
+            // delete var;
         }
-        if (dtw_dis.size()>0)
+
+        t2 = clock();
+        speend_time = (float)(t2 - t1) / CLOCKS_PER_SEC;
+        // printf("newtmpnode_list:::=%ld\r\n" , newtmpnode_list.size());
+        printf("匹配过程距离计算time speend %.3f\r\n'" , speend_time);
+
+        if (newtmpnode_list.size()>0)
         {
-            max_dis=*max_element(dtw_dis.begin(),dtw_dis.end());
+            // max_dis=*max_element(dtw_dis.begin(),dtw_dis.end());
             DTWDIS_THRE=(max_dis-min_dis)/min_dis;
             if (DTWDIS_THRE<0.01)
             {
@@ -370,8 +393,11 @@ float magMatchBase::processData(float ob_distance,float epoch_angle,float magnet
         printf("newtmpnode_list:::=%ld\r\n" , newtmpnode_list.size());
         printf("匹配距离计算time speend %.3f\r\n'" , speend_time);
         // count_size_300=0;
+        // #pragma omp parallel for
         for(auto item : newtmpnode_list)
+        // for(unsigned int var_i = 0; var_i <newtmpnode_list.size();var_i++)
         {
+            // nodeClass* item=newtmpnode_list[var_i];
             // if (newtmpnode_list.size()>900)
             // {
             //     if(count_size_300%(int(newtmpnode_list.size()/300))!=0)

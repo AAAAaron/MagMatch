@@ -13,7 +13,8 @@ int main(int argc, const char** argv) {
 
     vector<vector<float>> datafp,testdata;
     string filename="/home/aaron/project/MapMatching/data/allSecD_nohead.csv";
-    string filetest="/media/aaron/新加卷/工作记录/项目产出及记录/19年羲和后台过程归档/第二阶段材料整理/测试过程/android/pdata2/773.csv";
+    string filetest="/media/aaron/新加卷/工作记录/项目产出及记录/19年羲和后台过程归档/第二阶段材料整理/测试过程/iosFp/my_iOS_device_2019-06-26_16-48-43_+0800data.csv";
+    
     dataRead DR=dataRead(filename,datafp);
     dataRead::s_dataRead(filetest,testdata);
     printf("%ldX%ld\r\n",testdata.size(),testdata[0].size());
@@ -30,7 +31,7 @@ int main(int argc, const char** argv) {
         {
             continue;
         }
-        if (i==8)
+        if (i==94)
         {
             cout<<"------"<<endl;
             /* code */
